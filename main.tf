@@ -43,7 +43,7 @@ data "aws_imagebuilder_components" "managed_components" {
 resource "aws_security_group" "security_group" {
   count = var.create_security_group ? 1 : 0
   #checkov:skip=CKV2_AWS_5:Security Group is being attached if var create_security_group is true
-  name        = "${var.name}-sg"
+  name        = "${var.name}"
   description = "Security Group for for the EC2 Image Builder Build Instances"
   vpc_id      = data.aws_vpc.selected.id
 
@@ -102,7 +102,7 @@ data "aws_iam_policy_document" "assume" {
 
 resource "aws_iam_role" "awsserviceroleforimagebuilder" {
   assume_role_policy = data.aws_iam_policy_document.assume.json
-  name               = "${var.name}-role"
+  name               = "${var.name}"
   tags               = var.tags
 }
 
@@ -155,7 +155,7 @@ resource "aws_imagebuilder_infrastructure_configuration" "imagebuilder_infrastru
   instance_types        = var.instance_types
   key_pair              = var.instance_key_pair
 
-  name               = "${var.name}-infrastructure-configuration"
+  name               = "${var.name}"
   security_group_ids = var.create_security_group ? [aws_security_group.security_group[count.index].id] : var.security_group_ids
   subnet_id          = var.subnet_id
 
@@ -211,7 +211,7 @@ resource "aws_imagebuilder_image_pipeline" "imagebuilder_image_pipeline" {
       pipeline_execution_start_condition = schedule.value
     }
   }
-  name = "${var.name}-pipeline"
+  name = "${var.name}"
   tags = var.tags
 }
 
@@ -223,7 +223,7 @@ resource "aws_imagebuilder_image_pipeline" "imagebuilder_image_pipeline" {
 
 
 resource "aws_imagebuilder_image_recipe" "imagebuilder_image_recipe" {
-  name         = "${var.name}-image-recipe"
+  name         = "${var.name}"
   parent_image = data.aws_ami.source_ami.id
   version      = var.recipe_version
   
@@ -284,7 +284,7 @@ resource "aws_imagebuilder_image_recipe" "imagebuilder_image_recipe" {
 # ---------------------------------------------------------------------------------------------------------------------
 resource "aws_imagebuilder_distribution_configuration" "imagebuilder_distribution_configuration" {
   count = length(var.ami_regions_kms_key) > 0 ? 1 : 0 #need to add a count due the error "At least 1 "distribution" blocks are required" when ami_regions_kms_key = {}
-  name  = "${var.name}-distribution"
+  name  = "${var.name}"
 
   dynamic "distribution" {
     for_each = var.ami_regions_kms_key # for each region we need to have a new distribution setting
